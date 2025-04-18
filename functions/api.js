@@ -47,32 +47,53 @@ app.get('/.netlify/functions/api/questions', async (req, res) => {
 
 app.post('/.netlify/functions/api/login', async (req, res) => {
   try {
-    console.log('Login request received:', req.body);
-    const { usernameOrEmail, password } = req.body;
-
-    // Find user
-    const user = await User.findOne({
-      $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }]
+    console.log('Login request received:', {
+      body: req.body,
+      headers: req.headers
     });
 
+    const { usernameOrEmail, password } = req.body;
+
+    if (!usernameOrEmail || !password) {
+      return res.status(400).json({ 
+        error: "Username/email and password are required" 
+      });
+    }
+
+    const user = await User.findOne({
+      $or: [
+        { username: usernameOrEmail },
+        { email: usernameOrEmail }
+      ]
+    });
+
+    console.log('User found:', user ? 'Yes' : 'No');
+
     if (!user) {
-      return res.status(401).json({ error: "Invalid credentials" });
+      return res.status(401).json({ 
+        error: "Invalid credentials" 
+      });
     }
 
-    // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log('Password match:', isMatch ? 'Yes' : 'No');
+
     if (!isMatch) {
-      return res.status(401).json({ error: "Invalid credentials" });
+      return res.status(401).json({ 
+        error: "Invalid credentials" 
+      });
     }
 
-    // Create token
     const token = jwt.sign(
-      { userId: user._id, username: user.username, email: user.email },
+      { 
+        userId: user._id,
+        username: user.username,
+        email: user.email 
+      },
       process.env.JWT_SECRET || 'your-secret-key',
       { expiresIn: '24h' }
     );
 
-    // Send response
     res.json({
       token,
       user: {
@@ -83,7 +104,10 @@ app.post('/.netlify/functions/api/login', async (req, res) => {
     });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ error: "Login failed", details: error.message });
+    res.status(500).json({ 
+      error: "Login failed",
+      details: error.message 
+    });
   }
 });
 
