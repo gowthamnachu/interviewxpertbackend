@@ -6,7 +6,7 @@
   "type": "commonjs",
   "scripts": {
     "start": "node server.js",
-    "build": "npm install && mkdir -p functions && cp -r models functions/ && cp -r routes functions/",
+    "build": "npm install && mkdir -p functions public && cp -r models functions/ && cp -r routes functions/ && cp -r public/* public/",
     "dev": "nodemon server.js",
     "seed": "node seed.js"
   },

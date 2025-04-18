@@ -1,11 +1,15 @@
 [build]
   functions = "functions"
   command = "npm run build"
+  publish = "public"
 
 [functions]
   directory = "functions"
   node_bundler = "esbuild"
-  included_files = ["models/**", "routes/**"]
+  included_files = [
+    "models/**",
+    "routes/**"
+  ]
 
 [[redirects]]
   from = "/api/*"
