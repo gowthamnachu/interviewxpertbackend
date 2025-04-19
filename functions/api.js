@@ -162,13 +162,21 @@ app.post('/.netlify/functions/api/login', async (req, res) => {
 });
 
 // Register route
-app.post("/.netlify/functions/api/register", async (req, res) => {
+app.post(["/api/register", "/.netlify/functions/api/register"], async (req, res) => {
   try {
     const { username, email, password } = req.body;
     
     // Validate request body
     if (!username || !email || !password) {
       return res.status(400).json({ error: "All fields are required" });
+    }
+
+    // Validate password strength
+    const passwordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        error: "Password must be at least 8 characters long and include a number and special character"
+      });
     }
 
     // Check if user already exists
@@ -184,7 +192,7 @@ app.post("/.netlify/functions/api/register", async (req, res) => {
     res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
     console.error('Registration error:', error);
-    res.status(500).json({ error: "Registration failed" });
+    res.status(500).json({ error: error.message || "Registration failed" });
   }
 });
 
